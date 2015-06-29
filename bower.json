@@ -1,0 +1,20 @@
+{
+  "name": "language",
+  "version": "0.1.0",
+  "authors": [
+    "filow <lirenhai427@gmail.com>"
+  ],
+  "main": "core.js",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4"
+  }
+}

@@ -3,7 +3,11 @@
     // 存储当前的输入点位置
     this.pos = 0;
     this.line = 1;
-    this.col = 0;
+    this.col = 1;
+    // 可以处理单条表达式不加分号的情况
+    if(input[input.length-1]!=';'){
+      input = input+';';
+    }
     this.input = input;
   }
 
@@ -14,7 +18,7 @@
     var ch = this.input.charAt(this.pos++);
     if (ch == "\n"){
       this.line++;
-      this.col = 0;
+      this.col = 1;
     }else{
       this.col++;
     }

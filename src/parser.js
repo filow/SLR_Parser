@@ -1,5 +1,4 @@
 (function(global,undefined){
-  var _ = require('underscore');
   // rules
   // 0  S->L
   // 1  L->E;L
@@ -13,7 +12,7 @@
   // 9  F->num
 
   var terminals = ["ID","NUM",";","OP1","OP2","(",")","#"];
-  var action = [
+  var unparsed_action = [
   //  id    num   ;     op1   op2    (    )     #
     ["S6", "S7", "  ", "  ", "  ", "S5", "  ", "R2"],  //0
     ["  ", "  ", "  ", "  ", "  ", "  ", "  ", "AC"],  //1
@@ -32,6 +31,25 @@
     ["  ", "  ", "R5", "R5", "R5", "  ", "R5", "  "],  //14
     ["  ", "  ", "R7", "R7", "R7", "  ", "R7", "  "]  //15
   ];
+  // 将给定的规则表解析为计算机容易使用的格式
+  var action = [];
+  for(var i = 0; i< unparsed_action.length; i++){
+    action[i] = [];
+    for(var j = 0;j<terminals.length; j++){
+      var v = unparsed_action[i][j];
+      // 移进项
+      if (v.indexOf("S")==0){
+        action[i][terminals[j]] = {action: 'shift', code: parseInt(v.substr(1))}
+      }else if(v.indexOf("R")==0){
+        action[i][terminals[j]] = {action: 'reduce', code: parseInt(v.substr(1))}
+      }else if(v == 'AC'){
+        action[i][terminals[j]] = {action: 'success'}
+      }else{
+        action[i][terminals[j]] = {action: 'error'}
+      }
+    }
+  }
+
   var nonTerminals = ["L","E","T","F"];
   var goto = [
     // L   E   T   F
@@ -54,150 +72,156 @@
   ];
   function Parser(lexer){
     this.lexer = lexer;
-
-    // 将给定的规则表解析为计算机容易使用的格式
-    var parsed_action = [];
-    for(var i = 0; i< action.length; i++){
-      parsed_action[i] = [];
-      for(var j = 0;j<terminals.length; j++){
-        var v = action[i][j];
-        // 移进项
-        if (v.indexOf("S")==0){
-          parsed_action[i][terminals[j]] = {action: 'shift', code: parseInt(v.substr(1))}
-        }else if(v.indexOf("R")==0){
-          parsed_action[i][terminals[j]] = {action: 'reduce', code: parseInt(v.substr(1))}
-        }else if(v == 'AC'){
-          parsed_action[i][terminals[j]] = {action: 'success'}
-        }else{
-          parsed_action[i][terminals[j]] = {action: 'error'}
-        }
-      }
-    }
-    this.action = parsed_action;
+    this.action = action;
   }
   Parser.extend = function(fun_list){
     for(var fun in fun_list){
-      if(_.isFunction(fun_list[fun])){
+      if(typeof fun_list[fun] === 'function'){
         Parser.prototype[fun] = fun_list[fun];
       }
     }
   };
   Parser.extend({
+    // 获得在当前状态下下一个非终结符为nonT的情况下应当推入栈的状态
     _getGoto: function(nonT){
       return goto[this.codeStack.peek().code][nonTerminals.indexOf(nonT)];
     },
-    _pushState: function(nonT,value){
-      this.codeStack.push({code: this._getGoto(nonT), value: value});
+    // 将新状态推入栈
+    _pushState: function(nonT, value, re){
+      // re表示后缀表达式字符串
+      var rexpression = re.map(function(item){
+        return item.re;
+      }).join(' ');
+      this.codeStack.push({code: this._getGoto(nonT), value: value,re: rexpression});
     },
+    // 从状态栈中取出一个状态
     _pop:function(){
       return this.codeStack.pop();
     },
+    // reduce1-9,用于规约相应的规则
     _reduce1:function(){
       var L = this._pop();
-      this._pop();
+      var f = this._pop();
       var E = this._pop();
-      this._pushState('L',E.value.toString()+' '+ L.value.toString());
+      this._pushState('L',E.value.toString()+' '+ L.value.toString(),[E, L, f]);
     },
     _reduce2:function(){
-      this._pushState('L','');
+      this._pushState('L','',[]);
     },
     _reduce3:function(){
-      var T = this._pop().value;
+      var T = this._pop();
       var op1 = this._pop();
-      var E = this._pop().value;
+      var E = this._pop();
       var result;
       switch(op1.value){
         case '+':
-          result = E + T;
+          result = E.value + T.value;
           break;
         case '-':
-          result = E - T;
+          result = E.value - T.value;
       }
-      this._pushState('E',result);
+      this._pushState('E',result,[E, T, op1]);
     },
     _reduce4:function(){
       var num = this._pop();
-      this._pushState('E',num.value);
+      this._pushState('E',num.value,[num]);
     },
     _reduce5:function(){
-      var num1 = this._pop().value;
+      var num1 = this._pop();
       var op2 = this._pop();
-      var num2 = this._pop().value;
+      var num2 = this._pop();
       var result;
       switch(op2.value){
         case '*':
-          result = num2 * num1;
+          result = num2.value * num1.value;
           break;
         case '/':
         case 'div':
           if(num1 != 0){
-            result = num2 / num1;
+            result = num2.value / num1.value;
           }else{
             throw new Error('运行时错误: 除数不能为零');
           }
 
           break;
         case 'mod':
-          result = num2 % num1;
+          result = num2.value % num1.value;
       }
 
-      this._pushState('T',result);
+      this._pushState('T',result,[num2,num1,op2]);
     },
     _reduce6:function(){
       var num = this._pop();
-      this._pushState('T',num.value);
+      this._pushState('T',num.value,[num]);
     },
     _reduce7:function(){
-      this._pop();
+      var l = this._pop();
       var num = this._pop();
-      this._pop();
-      this._pushState('F',num.value);
+      var r = this._pop();
+      this._pushState('F',num.value,[num]);
     },
     _reduce8:function(){
       var id = this._pop();
       if(id.value == 'pi'){
-        this._pushState('F',3.14);
+        this._pushState('F',3.14,[id]);
       }else{
-        this._pushState('F',0);
+        this._pushState('F',0,[id]);
       }
 
     },
     _reduce9:function(){
       var num = this._pop();
-      this._pushState('F',num.value);
+      this._pushState('F',num.value,[num]);
     }
   });
   Parser.extend({
     parse: function(){
+      // 错误信息汇总
       var errorMsg = "";
+      // 初始化状态栈
       this.codeStack = [{code:0,value: ''}];
+
       var word,action,isSuccess = false;
+      // 为Array添加peek函数,方便使用
       Array.prototype.peek = function(){
         return this[this.length-1];
       };
+
+      // 先取一个token
       word = this.lexer.readNext();
       var result;
       while(!isSuccess){
+        // 取得状态栈第一个状态,并查找在输入为word的情况下对应的动作
         var cpeek = this.codeStack.peek();
         action = this.action[cpeek.code][word.type];
+
         switch (action["action"]){
+          // 移进
           case 'shift':
-            this.codeStack.push({code:action.code,value:word.value});
+            this.codeStack.push({code:action.code,value:word.value, re: word.value.toString()});
             word = this.lexer.readNext();
             break;
+          // 规约
           case 'reduce':
             this['_reduce'+action.code]();
             break;
+          // 接受
           case 'success':
             isSuccess = true;
-            result = cpeek.value;
+            result = {value: cpeek.value, re: cpeek.re};
             break;
+          // 错误处理
           case 'error':
+            // 取得错误位置
             var errorPos = this.lexer.getPos();
+            // 获得期望的符号串
             var expecting=[];
             for(var key in this.action[cpeek.code]){
+              // 排除非所需属性的干扰
               if(!this.action[cpeek.code].hasOwnProperty(key)) continue;
+              // 当对应的动作不是error时才推入
               if(this.action[cpeek.code][key]['action']!='error'){
+                // 将op1 和op2转换回原来的符号
                 if(key == 'OP1'){
                   expecting.push('+');
                   expecting.push('-');
@@ -212,12 +236,12 @@
 
               }
             }
-
+            // 拼接错误信息
             errorMsg+="\nUnexpected "+ word.value +
               " in Line:"+ errorPos.line +
               " col: "+ errorPos.col +
               ", expecting "+ expecting.join(', ');
-
+            // 比对当前token和下一个token,如果都是#,那么认为已经到文件末尾,直接抛出异常
             var nextword = this.lexer.readNext();
             if(word.value=='#' && nextword.value=='#'){
               throw new SyntaxError(errorMsg);

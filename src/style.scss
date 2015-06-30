@@ -1,0 +1,57 @@
+body{
+  background-color: #EFEFEF;
+  width: 800px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 14px;
+  font-weight: 100;
+}
+header{
+  h1{
+    text-align: center;
+    font-family: "Zapfino","Helvetica","Arial";
+    height: 130px;
+    font-size: 4em;
+    color: #C53D56;
+  }
+
+}
+
+h2{
+  color: #B3B3B3;;
+  font-weight: 100;
+  font-style: italic;
+  font-size: 1.4em;
+}
+#inputArea{
+  display: block;
+  background-color: #fff;
+  min-height: 80px;
+  box-shadow: 0 0 7px #C0C0C0;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 24px;
+  font-family: consolas;
+  margin: 10px 0;
+
+}
+div#result,div#rorder{
+  background-color: #fff;
+  border: 1px solid #DDD;
+  padding: 10px;
+  font-family: consolas;
+  border-radius: 3px;
+  min-height: 20px;
+  div.error{
+    color: red;
+  }
+  div.success{
+    color:green;
+  }
+}
+
+
+div#rorder{
+
+}

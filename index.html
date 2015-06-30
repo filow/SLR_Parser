@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
+<head>
     <meta charset="UTF-8">
-    <title>language</title>
-
-
+    <title>在线四则运算解释器</title>
 </head>
+<link href="./dist/style.css" rel="stylesheet" />
 <body>
-<textarea name="" id="inputArea" cols="60" rows="20">
-x=(1+2)*3/4
-</textarea>
+<header>
+    <h1>Calculator</h1>
+</header>
+<h2>请输入四则表达式</h2>
+<div contenteditable="true" id="inputArea">
+
+</div>
+
+<h2>运算结果</h2>
+<div id="result">
+</div>
+
+<h2>后缀表达式</h2>
+<div id="rorder">
+</div>
+
+
 </body>
-<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="./dist/bundle.js"></script>
 
 </html>

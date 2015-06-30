@@ -1,5 +1,4 @@
 (function(global,undefined){
-  var _ = require('underscore');
 
   // 构造函数
   function Lexer(input){
@@ -9,7 +8,7 @@
   // 为Lexer动态添加实例函数
   Lexer.extend = function(fun_list){
     for(var fun in fun_list){
-      if(_.isFunction(fun_list[fun])){
+      if(typeof fun_list[fun] === 'function'){
         Lexer.prototype[fun] = fun_list[fun];
       }
     }
@@ -31,9 +30,9 @@
 
   // 批量添加检查器
   Lexer.addCheckers = function (checkers){
-    _.each(checkers,function(val, key){
-      Lexer.addChecker(key, val);
-    });
+    for(var key in checkers){
+      Lexer.addChecker(key, checkers[key]);
+    }
   };
 
   Lexer.addCheckers({

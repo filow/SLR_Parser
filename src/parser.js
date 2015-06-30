@@ -130,7 +130,12 @@
           break;
         case '/':
         case 'div':
-          result = num2 / num1;
+          if(num1 != 0){
+            result = num2 / num1;
+          }else{
+            throw new Error('运行时错误: 除数不能为零');
+          }
+
           break;
         case 'mod':
           result = num2 % num1;
@@ -164,6 +169,7 @@
   });
   Parser.extend({
     parse: function(){
+      var errorMsg = "";
       this.codeStack = [{code:0,value: ''}];
       var word,action,isSuccess = false;
       Array.prototype.peek = function(){
@@ -172,10 +178,8 @@
       word = this.lexer.readNext();
       var result;
       while(!isSuccess){
-
-        action = this.action[this.codeStack.peek().code][word.type];
-        console.log('word:',word);
-        console.log(action);
+        var cpeek = this.codeStack.peek();
+        action = this.action[cpeek.code][word.type];
         switch (action["action"]){
           case 'shift':
             this.codeStack.push({code:action.code,value:word.value});
@@ -186,13 +190,45 @@
             break;
           case 'success':
             isSuccess = true;
-            result = this.codeStack.peek().value;
+            result = cpeek.value;
             break;
           case 'error':
-            console.log("Error");
+            var errorPos = this.lexer.getPos();
+            var expecting=[];
+            for(var key in this.action[cpeek.code]){
+              if(!this.action[cpeek.code].hasOwnProperty(key)) continue;
+              if(this.action[cpeek.code][key]['action']!='error'){
+                if(key == 'OP1'){
+                  expecting.push('+');
+                  expecting.push('-');
+                }else if(key == 'OP2'){
+                  expecting.push('*');
+                  expecting.push('/');
+                  expecting.push('DIV');
+                  expecting.push('MOD');
+                }else{
+                  expecting.push(key);
+                }
+
+              }
+            }
+
+            errorMsg+="\nUnexpected "+ word.value +
+              " in Line:"+ errorPos.line +
+              " col: "+ errorPos.col +
+              ", expecting "+ expecting.join(', ');
+
+            var nextword = this.lexer.readNext();
+            if(word.value=='#' && nextword.value=='#'){
+              throw new SyntaxError(errorMsg);
+            }else{
+              word = nextword;
+            }
         }
       }
-
+      if(errorMsg.length!=0){
+        throw new SyntaxError(errorMsg);
+      }
       return result;
     }
   });

@@ -17,6 +17,9 @@
     }
     return ch;
   };
+  InputStream.fn.getPos = function(){
+    return {line: this.line, col: this.col}
+  };
   InputStream.fn.peek = function(){
     return this.input.charAt(this.pos);
   };

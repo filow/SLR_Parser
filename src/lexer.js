@@ -47,6 +47,9 @@
     setInput: function (another){
       this.input = another;
     },
+    getPos: function(){
+      return this.input.getPos();
+    },
     // 一直读取输入直到eof或者判断函数不成立
     readWhile: function (checker){
       var str = "";
@@ -97,7 +100,8 @@
           return c!='\n';
         });
         this.input.next();
-        ch = this.input.next();
+        this.readWhile(Lexer.isSpace);
+        ch = this.input.peek();
       }
       // 首先读入数字常量
       if (Lexer.isDigit(ch)) return this.readNumber();
@@ -106,7 +110,9 @@
 
       // 读取运算符
       if (Lexer.isOper(ch)){
-        var oper = this.readWhile(Lexer.isOper);
+        //var oper = this.readWhile(Lexer.isOper);
+        var oper = ch;
+        this.input.next();
         if(oper == '+' || oper == '-'){
           return {type: 'OP1', value: oper}
         }else if(oper == '*' || oper == '/'){

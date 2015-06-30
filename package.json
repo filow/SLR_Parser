@@ -2,7 +2,7 @@
   "name": "language",
   "version": "0.1.0",
   "description": "一个简易的四则运算解释器",
-  "main": "src/main.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

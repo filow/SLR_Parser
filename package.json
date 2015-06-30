@@ -10,11 +10,16 @@
   "license": "ISC",
   "devDependencies": {
     "gulp": "^3.8.11",
+    "gulp-browserify": "^0.5.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-connect": "^2.2.0",
     "gulp-jshint": "^1.10.0",
+    "gulp-sass": "^2.0.3",
+    "gulp-uglify": "^1.2.0",
     "gulp-watch": "^4.2.4",
     "jshint-stylish": "^1.0.2"
   },
   "dependencies": {
-    "underscore": "^1.8.3"
+    "jquery": "^2.1.4"
   }
 }

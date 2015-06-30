@@ -1,6 +1,6 @@
 body{
   background-color: #EFEFEF;
-  width: 800px;
+  width: 80%;
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -11,11 +11,16 @@ header{
   h1{
     text-align: center;
     font-family: "Zapfino","Helvetica","Arial";
-    height: 130px;
+    max-height: 130px;
     font-size: 4em;
     color: #C53D56;
   }
 
+}
+@media screen and (max-width: 470px) {
+  h1{
+    font-size: 2em;
+  }
 }
 
 h2{

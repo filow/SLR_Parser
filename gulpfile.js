@@ -61,8 +61,8 @@ gulp.task('sass',function(){
 
 gulp.task('dist',function(){
   gulp.src('./src/*.js')
-    .pipe(browserify())
     .pipe(concat('bundle.js'))
+    .pipe(browserify())
     .pipe(uglify())
     .pipe(gulp.dest('./dist/'));
   return gulp.src('./src/*.scss')

@@ -1,13 +1,14 @@
 {
   "name": "language",
-  "version": "0.1.0",
-  "description": "一个简易的四则运算解释器",
+  "version": "0.3.0",
+  "description": "基于SLR文法的四则运算解释器",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
-  "author": "",
-  "license": "ISC",
+  "repository": "https://github.com/filow/SLR_Parser.git",
+  "author": "李仁海(dev@filowlee.com)",
+  "license": "Apache V2",
   "devDependencies": {
     "gulp": "^3.8.11",
     "gulp-browserify": "^0.5.1",
